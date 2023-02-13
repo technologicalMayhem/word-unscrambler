@@ -1,10 +1,24 @@
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use std::io;
+
+static DICT: Lazy<Vec<String>> = Lazy::new(|| {
+    include_str!("german.dic")
+        .to_uppercase()
+        .split('\n')
+        .filter_map(|str| {
+            let x: String = str.into();
+            if x.is_empty() {
+                None
+            } else {
+                Some(x)
+            }
+        })
+        .collect()
+});
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
-    let file = include_str!("german.dic").to_uppercase();
-    let dict: Vec<&str> = file.split('\n').collect();
     loop {
         let mut buffer = String::new();
         stdin.read_line(&mut buffer)?;
@@ -17,8 +31,9 @@ fn main() -> io::Result<()> {
         let word_pieces: Vec<&str> = buffer.split(' ').collect();
         let len = word_pieces.len();
         let permutations: Vec<Vec<&str>> = word_pieces.into_iter().permutations(len).collect();
-        let mut combinations: Vec<String> = Vec::new();
-        let mut found_valid = false;
+        let mut all_combinations: Vec<String> = Vec::new();
+        let mut compound_matches: Vec<String> = Vec::new();
+        let mut fullmatch = false;
 
         for possibility in permutations {
             let mut full = String::new();
@@ -26,19 +41,50 @@ fn main() -> io::Result<()> {
                 full += piece;
             }
             let full = full.to_uppercase();
-            if dict.contains(&full.as_str()) {
-                println!("{full}");
-                found_valid = true;
+            if DICT.contains(&full) {
+                println!("Volltreffer:\n{full}");
+                fullmatch = true;
+                break;
             }
-            combinations.push(full);
+            if check_match(&full) {
+                compound_matches.push(full);
+            } else {
+                all_combinations.push(full);
+            }
         }
 
-        if !found_valid && !combinations.is_empty() {
-            println!("Keine Übereinstimmung gefunden. Zeige alle Kombinationen:");
-            for combi in combinations {
-                println!("{combi}");
+        if !fullmatch {
+            if !compound_matches.is_empty() {
+                println!("Folgende Möglichkeiten gefunden:");
+                for compound_match in compound_matches {
+                    println!("{compound_match}");
+                }
+            } else if !all_combinations.is_empty() {
+                println!("Keine Übereinstimmung gefunden. Zeige alle Kombinationen:");
+                for combi in all_combinations {
+                    println!("{combi}");
+                }
+            } else {
+                println!("Nichts gefunden!");
+            }
+        }
+        println!();
+    }
+    Ok(())
+}
+
+fn check_match(input: &str) -> bool {
+    for ele in DICT.iter() {
+        if input.starts_with(ele) {
+            let reduce: String = input.chars().skip(ele.chars().count()).collect();
+            if reduce.is_empty() {
+                return true;
+            }
+            if check_match(&reduce) {
+                return true;
             }
         }
     }
-    Ok(())
+
+    false
 }
