@@ -31,9 +31,9 @@ fn main() -> io::Result<()> {
         let word_pieces: Vec<&str> = buffer.split(' ').collect();
         let len = word_pieces.len();
         let permutations: Vec<Vec<&str>> = word_pieces.into_iter().permutations(len).collect();
+        let mut full_matches: Vec<String> = Vec::new();
         let mut all_combinations: Vec<String> = Vec::new();
         let mut compound_matches: Vec<String> = Vec::new();
-        let mut fullmatch = false;
 
         for possibility in permutations {
             let mut full = String::new();
@@ -42,19 +42,22 @@ fn main() -> io::Result<()> {
             }
             let full = full.to_uppercase();
             if DICT.contains(&full) {
-                println!("Volltreffer:\n{full}");
-                fullmatch = true;
-                break;
+                full_matches.push(full);
             }
-            if check_match(&full) {
+            else if check_match(&full) {
                 compound_matches.push(full);
             } else {
                 all_combinations.push(full);
             }
         }
 
-        if !fullmatch {
-            if !compound_matches.is_empty() {
+            if !full_matches.is_empty() {
+                println!("Volltreffer:");
+                for full_match in full_matches {
+                    println!("{full_match}");
+                }
+            }
+            else if !compound_matches.is_empty() {
                 println!("Folgende Möglichkeiten gefunden:");
                 for compound_match in compound_matches {
                     println!("{compound_match}");
@@ -67,7 +70,6 @@ fn main() -> io::Result<()> {
             } else {
                 println!("Nichts gefunden!");
             }
-        }
         println!();
     }
     Ok(())
