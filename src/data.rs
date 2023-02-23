@@ -1,29 +1,41 @@
-struct TreeNode {
-    c: char,
-    children: Vec<char>,
+struct Node { children: Vec<Option<Box<Node>>>, 
+    is_end_of_word: bool,
 }
-
-impl TreeNode {
-    fn new(c: char) -> Self {
-        TreeNode {
-            c,
-            children: Vec::new()
+impl Node { fn new() -> Node { Node { children: vec![None; 
+            26], // 26 letters in English alphabet 
+            is_end_of_word: false,
         }
     }
-
-    pub fn build_tree(text: &str) -> Vec<Self> {
-        let chars = text.chars();
-        let mut nodes: Vec<TreeNode> = Vec::new();
-        let mut cur_node: Option<&mut TreeNode> = None;
-        
-        while let c = chars.next() {
-            if cur_node == None {
-                for node in &mut nodes {
-                    if node.c == c {
-                        
-                    }
-                }
+}
+struct Trie { root: Node,
+}
+impl Trie { fn new() -> Trie { Trie { root: Node::new() }
+    }
+    
+    fn insert(&mut self, word: &str) { let mut current_node 
+        = &mut self.root; for c in word.chars() {
+            let index = (c as u8 - b'a') as usize; // 
+            convert char to index if 
+            current_node.children[index].is_none() {
+                current_node.children[index] = 
+                Some(Box::new(Node::new()));
             }
+            current_node = 
+            current_node.children[index].as_mut().unwrap();
         }
+        current_node.is_end_of_word = true;
+    }
+    
+    fn search(&self, word: &str) -> bool { let mut 
+        current_node = &self.root; for c in word.chars() {
+            let index = (c as u8 - b'a') as usize; // 
+            convert char to index if 
+            current_node.children[index].is_none() {
+                return false;
+            }
+            current_node = 
+            current_node.children[index].as_ref().unwrap();
+        }
+        current_node.is_end_of_word
     }
 }
