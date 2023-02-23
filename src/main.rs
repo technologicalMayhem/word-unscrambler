@@ -2,6 +2,8 @@ use itertools::Itertools;
 use once_cell::sync::Lazy;
 use std::io;
 
+mod data;
+
 static DICT: Lazy<Vec<String>> = Lazy::new(|| {
     include_str!("german.dic")
         .to_uppercase()
