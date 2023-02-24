@@ -1,7 +1,3 @@
-#![feature(test)]
-
-extern crate test;
-
 use data::Trie;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
@@ -129,24 +125,4 @@ fn check_match(input: &str) -> bool {
     }
 
     false
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use test::Bencher;
-
-    #[bench]
-    fn bench_xor_1000_ints(b: &mut Bencher) {
-        let cases = vec!["kaf sse ta fee", "hte n ac rb ah", "efg ge ara ti"];
-
-        b.iter(|| {
-            // Use `test::black_box` to prevent compiler optimizations from disregarding
-            // Unused values
-
-            for ele in &cases {
-                get_possibilities(ele);
-            }
-        });
-    }
 }
